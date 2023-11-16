@@ -6,33 +6,6 @@ import io
 
 # load in our YOLOv4 architecture network
 class DetectedImage:
-  def __init__(self):
-    self.network, class_names, class_colors = load_network(
-        "/content/gdrive/MyDrive/signas/parameters/yolov4-custom.cfg", 
-        "/content/gdrive/MyDrive/signas/parameters/names.data", 
-        "/content/gdrive/MyDrive/signas/parameters/yolov4-custom_last_4500.weights"
-    )
-    self.className = class_names
-    self.colors = class_colors
-    self.width = network_width(self.network)
-    self.height = network_height(self.network)
-
-
-  def darknet_helper(self,img):
-    darknet_image = make_image(self.width, self.height, 3)
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img_resized = cv2.resize(img_rgb, (self.width, self.height),
-                                interpolation=cv2.INTER_LINEAR)
-    # get image ratios to convert bounding boxes to proper size
-    img_height, img_width, _ = img.shape
-    width_ratio = img_width/self.width
-    height_ratio = img_height/self.height
-
-    # run model on darknet style image to get detections
-    copy_image_from_bytes(darknet_image, img_resized.tobytes())
-    detections = detect_image(self.network, self.className, darknet_image)
-    free_image(darknet_image)
-    return detections, width_ratio, height_ratio
   def generate_image(self,data_test):
     directory_path = "/content/gdrive/MyDrive/signas/imagenes"
     all_files = os.listdir(directory_path)
