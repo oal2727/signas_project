@@ -2,6 +2,7 @@ import cv2
 import time
 import os
 
+# /Users/dash/Desktop/signas_project
       
 # weightsPath_vehicles = os.path.sep.join(["darknet/parameters/yolov4-custom_last.weights"])
 # configPath = os.path.sep.join(["darknet/parameters/yolov4-custom.cfg"])
@@ -11,23 +12,24 @@ NMS_THRESHOLD = 0.5
 COLORS = [(0, 255, 255), (255, 255, 0), (0, 255, 0), (255, 0, 0)]
 
 class_names=[]
-with open("C:/Users/dash/backend/parameters/data.names", 'r') as archivo:
+with open(os.path.join(os.getcwd(),"parameter","obj.names"), 'r') as archivo:
     lineas = archivo.read().splitlines()
     for item in lineas:
       class_names.append(item)
 
 
+final = os.path.join(os.getcwd(),"imagenes","wll")
+print(final)
 
-weightsPath_vehicles = "C:/Users/dash/backend/parameters/yolov4-custom_last.weights"# os.path.sep.join(["C://Users//dash//backend//parameter//yolov4-custom_last.weights"])
-configPath =  "C:/Users/dash/backend/parameters/yolov4-custom.cfg" # os.path.sep.join(["C://Users//dash//backend//parameter//yolov4-custom.cfg"])
+weightsPath_vehicles = os.path.join(os.getcwd(),"parameter","yolov4-custom_last_4500.weights")# "/Users/dash/Desktop/signas_project/parameter/yolov4-custom_last_4500.weights"# os.path.sep.join(["C://Users//dash//backend//parameter//yolov4-custom_last.weights"])
+configPath =  os.path.join(os.getcwd(),"parameter","yolov4-custom.cfg") # "/Users/dash/Desktop/signas_project/parameter/yolov4-custom.cfg" # os.path.sep.join(["C://Users//dash//backend//parameter//yolov4-custom.cfg"])
 net = cv2.dnn.readNet(configPath, weightsPath_vehicles)
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
 net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
 model = cv2.dnn_DetectionModel(net)
 model.setInputParams(size=(416, 416), scale=1/255, swapRB=True)
-image = cv2.imread("C:/Users/dash/backend/signa_prueba.jpg")
-
+image = cv2.imread("/Users/dash/Desktop/signas_project/detectado.png")
 
 fluxo = time.time()
 classes, scores, boxes = model.detect(image, CONFIDENCE_THRESHOLD, NMS_THRESHOLD)

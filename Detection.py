@@ -1,33 +1,63 @@
 # import darknet functions to perform object detections
-from darknet.darknet import *
+# from darknet.darknet import *
 from base64 import b64decode, b64encode
 import PIL
 import io
-
+import os
+import random
+import base64
+import cv2
+import time
+import redis
 # load in our YOLOv4 architecture network
-class DetectedImage:
+class DetectedImage():
+  def __init__(self):
+    self.CONFIDENCE_THRESHOLD = 0.6
+    self.NMS_THRESHOLD = 0.5
+    self.point=0
+    self.username=""
+    self.COLORS = [(0, 255, 255), (255, 255, 0), (0, 255, 0), (255, 0, 0)]
+    weightsPath_vehicles = "/Users/dash/Desktop/signas_project/parameter/yolov4-custom_last_4500.weights"# os.path.sep.join(["C://Users//dash//backend//parameter//yolov4-custom_last.weights"])
+    configPath =  "/Users/dash/Desktop/signas_project/parameter/yolov4-custom.cfg" # os.path.sep.join(["C://Users//dash//backend//parameter//yolov4-custom.cfg"])
+    net = cv2.dnn.readNet(configPath, weightsPath_vehicles)
+    # net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+    # net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+    net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
+    net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU  )
+    self.model = cv2.dnn_DetectionModel(net)
+    self.model.setInputParams(size=(416, 416), scale=1/255, swapRB=True)
+  def define_user(self,point,username):
+    self.point = point
+    self.username = f"{time.time()}_{username}"
+  def labels(self):
+    class_names=[]
+    with open("/Users/dash/Desktop/signas_project/parameter/obj.names", 'r') as archivo:
+        lineas = archivo.read().splitlines()
+        for item in lineas:
+          class_names.append(item)
+    return class_names
+
+  def detection(self,frame):
+    classes, scores, boxes = self.model.detect(
+    frame, 
+    self.CONFIDENCE_THRESHOLD, 
+    self.NMS_THRESHOLD)
+    return classes,scores,boxes
   def generate_image(self,data_test):
-    directory_path = "/content/gdrive/MyDrive/signas/imagenes"
+    nameDirectoryImages = "imagenes"
+    directory_path = os.path.join(os.getcwd(),nameDirectoryImages)
     all_files = os.listdir(directory_path)
     while True:
       random_file = random.choice(all_files)
       nameSplit= random_file.split(".")[0] # obtener solo la letra
-      nameFileImage=f"/content/gdrive/MyDrive/signas/imagenes/{random_file}"
+      nameFileImage = os.path.join(os.getcwd(),nameDirectoryImages,random_file)
+      # nameFileImage=f"/content/gdrive/MyDrive/signas/imagenes/{random_file}"
       if nameSplit not in data_test: # no volver a repetir si ya fue detectado
         with open(nameFileImage, 'rb') as image_file:
           bbox_bytes = base64.b64encode(image_file.read()).decode("utf-8")
           bbox_end = f"data:image/jpg;base64,{bbox_bytes}"
           return bbox_end,nameSplit
 
-  def loop_detection(self,detections,bbox,width_ratio,height_ratio,bbox_array):
-    for label, confidence, bbox in detections:
-      left, top, right, bottom = bbox2points(bbox)
-      left, top, right, bottom = int(left * width_ratio), int(top * height_ratio), int(right * width_ratio), int(bottom * height_ratio)
-      bbox_array = cv2.rectangle(bbox_array, (left, top), (right, bottom), class_colors[label], 2)
-      bbox_array = cv2.putText(bbox_array, "{} [{:.2f}]".format(label, float(confidence)),
-                        (left, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                        class_colors[label], 2)
-      return bbox_array
   def convert_segundos_a_minutos(self,segundos):
     minutos = segundos // 60
     segundos_restantes = segundos % 60
