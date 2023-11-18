@@ -16,7 +16,7 @@ import io
 # import Detection as detected
 app = Flask(__name__)
 
-TOTAL_PUNTOS=2
+TOTAL_PUNTOS=3
 
 cors = CORS(app,resources={r"/*":{"origins":"*"}})
 socketio = SocketIO(app,cors_allowed_origins="*")
@@ -52,7 +52,7 @@ def connect(data):
     print("cliente connnected")
 
 @app.route("/api/register",methods=["POST"])
-def send_data_postman():
+def send_data_man():
     # option postman
     # data = request.get_json()  # Obténer los datos JSON de la solicitud
     # print(data["name"])
@@ -65,11 +65,12 @@ def send_data_postman():
     # detected.redis_client.set(uuid_user,0)
     return {"total_points":TOTAL_PUNTOS}
 
-# CONFIDENCE_THRESHOLD = 0.6
+# CONFIDENCE_THRESHOLD = 0.6 labels
 # NMS_THRESHOLD = 0.5
 COLORS = [(0, 255, 255), (255, 255, 0), (0, 255, 0), (255, 0, 0)]
 class_names=[]
-with open("/Users/dash/Desktop/signas_project/parameter/obj.names", 'r') as archivo:
+file_names = os.path.join(os.getcwd(),"parameter","obj.names")
+with open(file_names, 'r') as archivo:
     lineas = archivo.read().splitlines()
     for item in lineas:
       class_names.append(item)

@@ -8,7 +8,6 @@ import random
 import base64
 import cv2
 import time
-import redis
 # load in our YOLOv4 architecture network
 class DetectedImage():
   def __init__(self):
@@ -17,9 +16,11 @@ class DetectedImage():
     self.point=0
     self.username=""
     self.COLORS = [(0, 255, 255), (255, 255, 0), (0, 255, 0), (255, 0, 0)]
-    weightsPath_vehicles = "/Users/dash/Desktop/signas_project/parameter/yolov4-custom_last_4500.weights"# os.path.sep.join(["C://Users//dash//backend//parameter//yolov4-custom_last.weights"])
-    configPath =  "/Users/dash/Desktop/signas_project/parameter/yolov4-custom.cfg" # os.path.sep.join(["C://Users//dash//backend//parameter//yolov4-custom.cfg"])
-    net = cv2.dnn.readNet(configPath, weightsPath_vehicles)
+    directory_root = os.getcwd()
+    # weight = "/Users/dash/Desktop/signas_project/parameter/yolov4-custom_last_4500.weights"# os.path.sep.join(["C://Users//dash//backend//parameter//yolov4-custom_last.weights"])
+    weight = os.path.join(directory_root,"parameter","yolov4-custom_last_4500.weights")
+    configPath = os.path.join(directory_root,"parameter","yolov4-custom.cfg") # "/Users/dash/Desktop/signas_project/parameter/yolov4-custom.cfg" # os.path.sep.join(["C://Users//dash//backend//parameter//yolov4-custom.cfg"])
+    net = cv2.dnn.readNet(configPath, weight)
     # net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
     # net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
     net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
@@ -29,14 +30,6 @@ class DetectedImage():
   def define_user(self,point,username):
     self.point = point
     self.username = f"{time.time()}_{username}"
-  def labels(self):
-    class_names=[]
-    with open("/Users/dash/Desktop/signas_project/parameter/obj.names", 'r') as archivo:
-        lineas = archivo.read().splitlines()
-        for item in lineas:
-          class_names.append(item)
-    return class_names
-
   def detection(self,frame):
     classes, scores, boxes = self.model.detect(
     frame, 
